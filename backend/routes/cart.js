@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import auth from "../middleware/auth.js";
+import {protect} from "../middleware/auth.js";
 import User from "../models/user.js";
 
 /**
@@ -35,7 +35,7 @@ import User from "../models/user.js";
  */
 
 // Add to cart
-router.post("/add", auth, async (req, res) => {
+router.post("/add", protect, async (req, res) => {
     try {
         const { productId, quantity } = req.body;
         const user = await User.findById(req.user.id);
@@ -58,7 +58,7 @@ router.post("/add", auth, async (req, res) => {
 });
 
 // Get cart
-router.get("/", auth, async (req, res) => {
+router.get("/", protect, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).populate("cart.productId");
         res.json(user.cart);
@@ -80,7 +80,7 @@ router.get("/", auth, async (req, res) => {
  */
 
 // Remove from cart
-router.delete("/remove/:productId", auth, async (req, res) => {
+router.delete("/remove/:productId", protect, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         user.cart = user.cart.filter(item => item.productId != req.params.productId);
@@ -111,4 +111,4 @@ router.delete("/remove/:productId", auth, async (req, res) => {
  *         description: Item removed
  */
 
-module.exports = router;
+export default router;

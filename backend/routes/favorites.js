@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import auth from "../middleware/auth.js";
+import {protect} from "../middleware/auth.js";
 import User from "../models/user.js";
 
 /**
@@ -33,7 +33,7 @@ import User from "../models/user.js";
  */
 
 // Add to favorites
-router.post("/add", auth, async (req, res) => {
+router.post("/add", protect, async (req, res) => {
     try {
         const { productId } = req.body;
         const user = await User.findById(req.user.id);
@@ -51,7 +51,7 @@ router.post("/add", auth, async (req, res) => {
 });
 
 // Get favorites
-router.get("/", auth, async (req, res) => {
+router.get("/", protect, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).populate("favorites.productId");
         res.json(user.favorites);
@@ -73,7 +73,7 @@ router.get("/", auth, async (req, res) => {
  */
 
 // Remove favorite
-router.delete("/remove/:productId", auth, async (req, res) => {
+router.delete("/remove/:productId", protect, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         user.favorites = user.favorites.filter(item => item.productId != req.params.productId);
@@ -102,4 +102,4 @@ router.delete("/remove/:productId", auth, async (req, res) => {
  *         description: Removed
  */
 
-module.exports = router;
+export default router;

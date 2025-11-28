@@ -9,6 +9,7 @@ import productRoutes from './routes/product.js';
 import { swaggerSpec, swaggerUiMiddleware } from "./swagger.js";
 import cartRoutes from './routes/cart.js';
 import favoritesRoutes from './routes/favorites.js';
+import categoryRoutes from './routes/category.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/favorites', favoritesRoutes);
+app.use('/api/categories', categoryRoutes);
 connectDB();
 
 // 7. Start the server

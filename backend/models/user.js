@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    isAdmin: {
+        type: Boolean,
+        default: false,
+    },
     cart: [
         {
             productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
