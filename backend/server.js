@@ -19,8 +19,24 @@ const PORT = process.env.PORT ?? 5000;
 // Middleware
 app.use(express.json());
 
-// CORS: open to all origins for team-friendly dev/testing
-app.use(cors());
+
+// CORS: allow frontend domain in production, all origins in development
+const allowedOrigins = process.env.NODE_ENV === "production"
+  ? ["https://wig-api.onrender.com"]
+  : ["*"];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
 
 // Ensure CORS headers and handle preflight requests
 app.use((req, res, next) => {
