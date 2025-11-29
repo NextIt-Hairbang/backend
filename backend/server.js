@@ -11,6 +11,7 @@ import favoritesRoutes from './routes/favorites.js';
 import categoryRoutes from './routes/category.js';
 
 dotenv.config();
+console.log("DEBUG → Render PORT env variable:", process.env.PORT);
 
 const app = express();
 const PORT = process.env.PORT ?? 5000;
