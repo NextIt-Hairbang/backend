@@ -11,6 +11,7 @@ import favoritesRoutes from './routes/favorites.js';
 import categoryRoutes from './routes/category.js';
 
 dotenv.config();
+console.log("DEBUG → Render PORT env variable:", process.env.PORT);
 
 const app = express();
 const PORT = process.env.PORT ?? 5000;
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
 
   next();
 });
+
 
 // Swagger docs (after CORS middleware so Try-it-out can call the API)
 app.use("/herhair-docs", swaggerUiMiddleware.serve, swaggerUiMiddleware.setup(swaggerSpec));
