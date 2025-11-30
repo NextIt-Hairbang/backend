@@ -17,7 +17,7 @@ const options = {
     servers: [
       {
     url: process.env.NODE_ENV === "production"
-      ? "https://your-render-app.onrender.com"
+      ? "https://wig-api.onrender.com"
       : "http://localhost:5000",
   },
     ],
