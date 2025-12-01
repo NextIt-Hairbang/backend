@@ -22,21 +22,30 @@ app.use(express.json());
 
 // CORS: allow frontend domain in production, all origins in development
 const allowedOrigins = process.env.NODE_ENV === "production"
-  ? ["https://wig-api.onrender.com"]
+  ? ["https://hair-bang.vercel.app"]
   : ["*"];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps, curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+    if (!origin) return callback(null, true); // mobile, curl, etc.
+
+    if (
+      allowedOrigins.includes("*") ||
+      allowedOrigins.includes(origin) ||
+      allowedOrigins.some(o => origin.startsWith(o))
+    ) {
       return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
     }
+
+    return callback(new Error("Not allowed by CORS: " + origin));
   },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 }));
+
+app.options("*", cors());
+
 
 
 
