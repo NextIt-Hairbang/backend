@@ -22,7 +22,7 @@ app.use(express.json());
 
 // CORS: allow frontend domain in production, all origins in development
 const allowedOrigins = process.env.NODE_ENV === "production"
-  ? ["https://hair-bang.vercel.app"]
+  ? ["*"]
   : ["*"];
 
 app.use(cors({
