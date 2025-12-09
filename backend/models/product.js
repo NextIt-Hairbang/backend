@@ -22,15 +22,12 @@ const productSchema = new mongoose.Schema({
     },
 
     category: {
-        type: String,
-        default: "General"
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+        required: true
     },
 
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
-});
+}, { timestamps: true });
 
 // Prevent OverwriteModelError
 const Product =

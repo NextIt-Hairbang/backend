@@ -71,7 +71,8 @@ router.post("/new", protect, isAdmin, async (req, res) => {
 // Get all products
 router.get("/", async (req, res) => {
     try {
-        const products = await Product.find();
+        const products = await Product.find().populate("category", "name slug");
+
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: "Server error" });
@@ -93,7 +94,8 @@ router.get("/", async (req, res) => {
 // Get single product by ID
 router.get("/:id", async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findById(id).populate("category", "name slug");
+
 
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
