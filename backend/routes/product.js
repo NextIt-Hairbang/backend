@@ -4,6 +4,288 @@ import { protect } from "../middleware/auth.js";
 import { isAdmin } from "../middleware/admin.js";
 
 const router = express.Router();
+ 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Product:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: MongoDB generated id
+ *         name:
+ *           type: string
+ *         price:
+ *           type: number
+ *         image:
+ *           type: string
+ *         description:
+ *           type: string
+ *         category:
+ *           type: string
+ *         quantity:
+ *           type: integer
+ *       required:
+ *         - name
+ *         - price
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   - name: Products
+ *     description: Product management
+ */
+
+/**
+ * @swagger
+ * /api/products/new:
+ *   post:
+ *     summary: Create a new product (admin only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Product'
+ *     responses:
+ *       201:
+ *         description: Product created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin privileges required
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Get all products
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: List of products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Get a product by ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Update a product (admin only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               image:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               quantity:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin privileges required
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   delete:
+ *     summary: Delete a product (admin only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin privileges required
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/products/{id}/sell:
+ *   post:
+ *     summary: Decrement product quantity (sell) (admin only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Stock updated
+ *       400:
+ *         description: Not enough stock
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin privileges required
+ *       404:
+ *         description: Product not found
+ */
+
+/**
+ * @swagger
+ * /api/products/{id}/restock:
+ *   post:
+ *     summary: Increment product quantity (restock) (admin only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Stock restocked
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin privileges required
+ *       404:
+ *         description: Product not found
+ */
+
+/**
+ * @swagger
+ * /api/products/status/{status}:
+ *   get:
+ *     summary: Filter products by stock status
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: ["in stock", "low stock", "out of stock"]
+ *     responses:
+ *       200:
+ *         description: List of products matching status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ *       400:
+ *         description: Invalid status
+ *       500:
+ *         description: Server error
+ */
 
 // CREATE PRODUCT
 router.post("/new", protect, isAdmin, async (req, res) => {
