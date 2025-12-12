@@ -29,7 +29,7 @@ router.post("/init", async (req, res) => {
 });
 
 // VERIFY PAYSTACK
-router.get("/verify", async (req, res) => {
+router.get("/verify/:reference", async (req, res) => {
   try {
     const reference = req.query.reference;
 
