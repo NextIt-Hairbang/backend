@@ -28,10 +28,11 @@ router.post("/init", async (req, res) => {
   }
 });
 
+
 // VERIFY PAYSTACK
 router.get("/verify/:reference", async (req, res) => {
   try {
-    const reference = req.query.reference;
+    const { reference } = req.params; // <-- use req.params instead of req.query
 
     const verify = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
@@ -47,11 +48,11 @@ router.get("/verify/:reference", async (req, res) => {
     }
 
     res.json({ message: "Payment verified", data: verify.data.data });
-
   } catch (err) {
-    console.error(err);
+    console.error(err.response?.data || err.message);
     res.status(500).json({ message: "Verification failed" });
   }
 });
+
 
 export default router;

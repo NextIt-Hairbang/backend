@@ -111,4 +111,78 @@ router.delete("/remove/:productId", protect, async (req, res) => {
  *         description: Item removed
  */
 
+/**
+ * @swagger
+ * /api/cart/update:
+ *   put:
+ *     summary: Update quantity for a product in the current user's cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *               quantity:
+ *                 type: integer
+ *             required:
+ *               - productId
+ *               - quantity
+ *     responses:
+ *       200:
+ *         description: Cart updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 cart:
+ *                   type: array
+ *       400:
+ *         description: Bad request (missing fields or invalid quantity)
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product not in cart
+ *       500:
+ *         description: Server error
+ */
+// Update cart quantity
+router.put("/update", protect, async (req, res) => {
+  try {
+    const { productId, quantity } = req.body;
+
+    if (!productId || quantity === undefined) {
+      return res.status(400).json({ message: "Product ID and quantity required" });
+    }
+
+    if (quantity < 1) {
+      return res.status(400).json({ message: "Quantity must be at least 1" });
+    }
+
+    const user = await User.findById(req.user.id);
+    const item = user.cart.find(item => item.productId.toString() === productId);
+
+    if (!item) {
+      return res.status(404).json({ message: "Product not in cart" });
+    }
+
+    item.quantity = quantity; // update quantity
+    await user.save();
+
+    res.json({ message: "Cart updated", cart: user.cart });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
+});
+
+
 export default router;
