@@ -30,10 +30,12 @@ router.post("/init", async (req, res) => {
 
 
 // VERIFY PAYSTACK
-router.get("/verify/:reference", async (req, res) => {
+// verify payment and update stock
+router.get("/verify/:reference", protect, async (req, res) => {
   try {
-    const { reference } = req.params; // <-- use req.params instead of req.query
+    const reference = req.params.reference;
 
+    // call Paystack verify API
     const verify = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -43,16 +45,35 @@ router.get("/verify/:reference", async (req, res) => {
       }
     );
 
+    // check if payment succeeded
     if (verify.data.data.status !== "success") {
       return res.status(400).json({ message: "Payment failed" });
     }
 
-    res.json({ message: "Payment verified", data: verify.data.data });
+    // 1️⃣ Update stock
+    const cart = verify.data.data.metadata.cart;
+    for (const item of cart) {
+      const product = await Product.findById(item.productId);
+      if (product) {
+        product.quantity = Math.max(product.quantity - item.quantity, 0);
+        await product.save();
+      }
+    }
+
+    // 2️⃣ Clear user's cart
+    const user = await User.findById(req.user.id);
+    user.cart = [];
+    await user.save();
+
+    // 3️⃣ Respond to frontend
+    res.json({ message: "Payment verified and stock updated successfully" });
+
   } catch (err) {
-    console.error(err.response?.data || err.message);
+    console.error(err);
     res.status(500).json({ message: "Verification failed" });
   }
 });
+
 
 
 export default router;
