@@ -1,5 +1,9 @@
 import express from "express";
 import axios from "axios";
+import { protect } from "../middleware/auth.js";
+import Product from "../models/product.js";
+import User from "../models/user.js";
+
 const router = express.Router();
 
 // INIT PAYSTACK
