@@ -9,6 +9,8 @@ import { swaggerSpec, swaggerUiMiddleware } from "./swagger.js";
 import cartRoutes from './routes/cart.js';
 import favoritesRoutes from './routes/favorites.js';
 import categoryRoutes from './routes/category.js';
+import paystackRoutes from './routes/paystack.js';
+import checkoutRoutes from './routes/checkout.js';
 
 dotenv.config();
 console.log("DEBUG → Render PORT env variable:", process.env.PORT);
@@ -18,6 +20,7 @@ const PORT = process.env.PORT ?? 5000;
 
 // Middleware
 app.use(express.json());
+
 
 
 // CORS: allow frontend domain in production, all origins in development
@@ -43,6 +46,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 }));
+app.use("/api/paystack", paystackRoutes);
+app.use("/api/checkout", checkoutRoutes);
 
 
 
