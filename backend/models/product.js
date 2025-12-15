@@ -17,9 +17,9 @@ const productSchema = new mongoose.Schema(
       default: null,
     },
 
-    image: {
-      type: String,
-      default: "",
+    images: {
+      type: [String], // array of image URLs
+      default: [],
     },
 
     description: {
@@ -43,17 +43,11 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.pre("validate", function (next) {
-  if (
-    this.discountedPrice !== null &&
-    this.discountedPrice >= this.price
-  ) {
-    return next(
-      new Error("Discounted price must be less than price")
-    );
+  if (this.discountedPrice !== null && this.discountedPrice >= this.price) {
+    return next(new Error("Discounted price must be less than price"));
   }
   next();
 });
-
 
 productSchema.pre("save", function (next) {
   if (this.quantity === 0) this.status = "out of stock";
