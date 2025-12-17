@@ -19,8 +19,11 @@ const router = express.Router();
  *           type: string
  *         price:
  *           type: number
- *         image:
- *           type: string
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *
  *         description:
  *           type: string
  *         category:
@@ -137,8 +140,10 @@ const router = express.Router();
  *                 type: string
  *               price:
  *                 type: number
- *               image:
- *                 type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *               description:
  *                 type: string
  *               category:
@@ -290,7 +295,7 @@ const router = express.Router();
 // CREATE PRODUCT
 router.post("/new", protect, isAdmin, async (req, res) => {
   try {
-    const { name, price, discountedPrice, image, description, category } =
+    const { name, price, discountedPrice, images, description, category } =
       req.body;
     const quantity = req.body.quantity ?? 0; // ensures 0 if undefined
 
@@ -298,7 +303,7 @@ router.post("/new", protect, isAdmin, async (req, res) => {
       name,
       price,
       discountedPrice: discountedPrice ?? null,
-      image,
+      images,
       description,
       category,
       quantity,
@@ -342,7 +347,7 @@ router.put("/:id", protect, isAdmin, async (req, res) => {
       name,
       price,
       discountedPrice,
-      image,
+      images,
       description,
       category,
       quantity,
@@ -354,7 +359,9 @@ router.put("/:id", protect, isAdmin, async (req, res) => {
     if (price !== undefined) product.price = price;
     if (discountedPrice !== undefined)
       product.discountedPrice = discountedPrice || null;
-    if (image !== undefined) product.image = image;
+    if (Array.isArray(images) && images.length > 0) {
+      product.images = images;
+    }
     if (description !== undefined) product.description = description;
     if (category !== undefined) product.category = category;
     if (quantity !== undefined) product.quantity = quantity;
