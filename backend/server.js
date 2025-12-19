@@ -11,6 +11,7 @@ import favoritesRoutes from './routes/favorites.js';
 import categoryRoutes from './routes/category.js';
 import paystackRoutes from './routes/paystack.js';
 import checkoutRoutes from './routes/checkout.js';
+import contactRoute from "./routes/contact.js";
 
 dotenv.config();
 console.log("DEBUG → Render PORT env variable:", process.env.PORT);
@@ -48,6 +49,7 @@ app.use(cors({
 }));
 app.use("/api/paystack", paystackRoutes);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api", contactRoute);
 
 
 
