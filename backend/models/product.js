@@ -27,6 +27,18 @@ const productSchema = new mongoose.Schema(
       default: "",
     },
 
+    length: {
+      type: Number, // e.g. 12, 14, 16, 18
+    },
+
+    color: {
+      type: String, // e.g. Black, Brown, Blonde
+    },
+
+    texture: {
+      type: String, // e.g. Straight, Body Wave, Curly
+    },
+
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",

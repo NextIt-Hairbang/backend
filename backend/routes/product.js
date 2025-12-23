@@ -307,6 +307,9 @@ router.post("/new", protect, isAdmin, async (req, res) => {
       description,
       category,
       quantity,
+      length: Number,
+      color: String,
+      texture: String,
     });
 
     res.status(201).json({ message: "Product created", product });
@@ -351,6 +354,9 @@ router.put("/:id", protect, isAdmin, async (req, res) => {
       description,
       category,
       quantity,
+      length,
+      color,
+      texture,
     } = req.body;
     let product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
