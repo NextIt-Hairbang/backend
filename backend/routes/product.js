@@ -540,5 +540,37 @@ router.get("/status/:status", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+// GET FILTER OPTIONS (length, color, texture)
+router.get("/filters/options", async (req, res) => {
+  try {
+    const products = await Product.find(
+      {},
+      { length: 1, color: 1, texture: 1 }
+    );
+
+    const lengths = [
+      ...new Set(products.map(p => p.length).filter(Boolean)),
+    ].sort((a, b) => Number(a) - Number(b));
+
+    const colors = [
+      ...new Set(products.map(p => p.color).filter(Boolean)),
+    ].sort();
+
+    const textures = [
+      ...new Set(products.map(p => p.texture).filter(Boolean)),
+    ].sort();
+
+    res.json({
+      lengths,
+      colors,
+      textures,
+    });
+  } catch (error) {
+    console.error("Filter options error:", error);
+    res.status(500).json({ message: "Failed to load filter options" });
+  }
+});
+
+
 
 export default router;
