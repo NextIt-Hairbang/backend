@@ -75,8 +75,39 @@ const router = express.Router();
  * @swagger
  * /api/products:
  *   get:
- *     summary: Get all products
+ *     summary: Get products with optional filters
  *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: color
+ *         schema:
+ *           type: string
+ *         description: Filter products by color (case-insensitive)
+ *       - in: query
+ *         name: texture
+ *         schema:
+ *           type: string
+ *         description: Filter products by texture (case-insensitive)
+ *       - in: query
+ *         name: minLength
+ *         schema:
+ *           type: number
+ *         description: Minimum product length
+ *       - in: query
+ *         name: maxLength
+ *         schema:
+ *           type: number
+ *         description: Maximum product length
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum product price
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum product price
  *     responses:
  *       200:
  *         description: List of products
@@ -295,8 +326,17 @@ const router = express.Router();
 // CREATE PRODUCT
 router.post("/new", protect, isAdmin, async (req, res) => {
   try {
-    const { name, price, discountedPrice, images, description, category } =
-      req.body;
+    const {
+      name,
+      price,
+      discountedPrice,
+      images,
+      description,
+      category,
+      length,
+      color,
+      texture,
+    } = req.body;
     const quantity = req.body.quantity ?? 0; // ensures 0 if undefined
 
     const product = await Product.create({
@@ -307,9 +347,9 @@ router.post("/new", protect, isAdmin, async (req, res) => {
       description,
       category,
       quantity,
-      length: Number,
-      color: String,
-      texture: String,
+      length,
+      color,
+      texture,
     });
 
     res.status(201).json({ message: "Product created", product });
@@ -322,7 +362,47 @@ router.post("/new", protect, isAdmin, async (req, res) => {
 // GET ALL PRODUCTS
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find().populate("category", "name slug");
+    const {
+      color,
+      texture,
+      category,
+      minLength,
+      maxLength,
+      minPrice,
+      maxPrice,
+    } = req.query;
+
+    const query = {};
+
+    if (color) {
+      query.color = color.toLowerCase();
+    }
+
+    if (texture) {
+      query.texture = texture.toLowerCase();
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (minLength || maxLength) {
+      query.length = {};
+      if (minLength) query.length.$gte = Number(minLength);
+      if (maxLength) query.length.$lte = Number(maxLength);
+    }
+
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    const products = await Product.find(query).populate(
+      "category",
+      "name slug"
+    );
+
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -371,6 +451,9 @@ router.put("/:id", protect, isAdmin, async (req, res) => {
     if (description !== undefined) product.description = description;
     if (category !== undefined) product.category = category;
     if (quantity !== undefined) product.quantity = quantity;
+    if (length !== undefined) product.length = length;
+    if (color !== undefined) product.color = color;
+    if (texture !== undefined) product.texture = texture;
 
     product = await product.save();
     res.status(200).json({ message: "Product updated successfully", product });
@@ -434,14 +517,24 @@ router.post("/:id/restock", protect, isAdmin, async (req, res) => {
 router.get("/status/:status", async (req, res) => {
   try {
     const { status } = req.params;
-    if (!["in stock", "low stock", "out of stock"].includes(status)) {
+
+    let query = {};
+
+    if (status === "out of stock") {
+      query.quantity = 0;
+    } else if (status === "low stock") {
+      query.quantity = { $gt: 0, $lt: 5 };
+    } else if (status === "in stock") {
+      query.quantity = { $gte: 5 };
+    } else {
       return res.status(400).json({ message: "Invalid status" });
     }
 
-    const products = await Product.find({ status }).populate(
+    const products = await Product.find(query).populate(
       "category",
       "name slug"
     );
+
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: "Server error" });

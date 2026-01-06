@@ -28,17 +28,21 @@ const productSchema = new mongoose.Schema(
     },
 
     length: {
-      type: String, // e.g. 12, 14, 16, 18
-      trim: true,
+      type: Number, // inches
+      min: 8,
+      max: 30,
     },
 
     color: {
-      type: String, // e.g. Black, Brown, Blonde
+      type: [String], // e.g. Black, Brown, Blonde
+      default: [],
       trim: true,
     },
 
     texture: {
-      type: String, // e.g. Straight, Body Wave, Curly
+      type: String,
+      enum: ["straight", "body wave", "curly", "wavy"],
+      lowercase: true,
       trim: true,
     },
 
@@ -48,11 +52,6 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     quantity: { type: Number, default: 0 },
-    status: {
-      type: String,
-      enum: ["in stock", "low stock", "out of stock"],
-      default: "in stock",
-    },
   },
   { timestamps: true }
 );
@@ -75,7 +74,7 @@ productSchema.pre("save", function (next) {
   }
 
   if (this.color) {
-    this.color = this.color.toLowerCase().trim();
+    this.color = this.color.map((c) => c.toLowerCase().trim());
   }
 
   if (this.texture) {
@@ -83,6 +82,13 @@ productSchema.pre("save", function (next) {
   }
   next();
 });
+
+productSchema.virtual("status").get(function () {
+  if (this.quantity === 0) return "out of stock";
+  if (this.quantity < 5) return "low stock";
+  return "in stock";
+});
+
 // Prevent OverwriteModelError
 const Product =
   mongoose.models.Product || mongoose.model("Product", productSchema);
