@@ -5,6 +5,7 @@ const productSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     price: {
@@ -18,32 +19,32 @@ const productSchema = new mongoose.Schema(
     },
 
     images: {
-      type: [String], // array of image URLs
+      type: [String],
       default: [],
     },
 
     description: {
       type: String,
       default: "",
+      trim: true,
     },
 
     length: {
-      type: Number, // inches
-      min: 8,
-      max: 30,
+      type: String, // e.g. "12", "14", "18"
+      trim: true,
+      lowercase: true,
     },
 
     color: {
-      type: [String], // e.g. Black, Brown, Blonde
-      default: [],
+      type: String, // e.g. "black", "brown"
       trim: true,
+      lowercase: true,
     },
 
     texture: {
-      type: String,
-      enum: ["straight", "body wave", "curly", "wavy"],
-      lowercase: true,
+      type: String, // e.g. "deep wave", "body wave"
       trim: true,
+      lowercase: true,
     },
 
     category: {
@@ -51,11 +52,23 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
-    quantity: { type: Number, default: 0 },
+
+    quantity: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    status: {
+      type: String,
+      enum: ["in stock", "low stock", "out of stock"],
+      default: "in stock",
+    },
   },
   { timestamps: true }
 );
 
+// 🔒 Discount validation
 productSchema.pre("validate", function (next) {
   if (this.discountedPrice !== null && this.discountedPrice >= this.price) {
     return next(new Error("Discounted price must be less than price"));
@@ -63,33 +76,15 @@ productSchema.pre("validate", function (next) {
   next();
 });
 
+// 📦 Stock + normalization
 productSchema.pre("save", function (next) {
   if (this.quantity === 0) this.status = "out of stock";
-  else if (this.quantity < 5)
-    this.status = "low stock"; // threshold for low stock
+  else if (this.quantity < 5) this.status = "low stock";
   else this.status = "in stock";
 
-  if (this.length) {
-    this.length = this.length.toLowerCase().trim();
-  }
-
-  if (this.color) {
-    this.color = this.color.map((c) => c.toLowerCase().trim());
-  }
-
-  if (this.texture) {
-    this.texture = this.texture.toLowerCase().trim();
-  }
   next();
 });
 
-productSchema.virtual("status").get(function () {
-  if (this.quantity === 0) return "out of stock";
-  if (this.quantity < 5) return "low stock";
-  return "in stock";
-});
-
-// Prevent OverwriteModelError
 const Product =
   mongoose.models.Product || mongoose.model("Product", productSchema);
 
